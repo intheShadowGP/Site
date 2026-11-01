@@ -1,0 +1,192 @@
+---
+import SectionHeader from './SectionHeader.astro';
+import { pick, t, type Lang } from '../i18n';
+import { experiences } from '../data/experience';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const d = t(lang).experience;
+---
+
+<section id="experience" class="section experience" aria-labelledby="experience-title">
+  <div class="container">
+    <SectionHeader id="experience" index="03" label={d.label} title={d.title} intro={d.intro} />
+
+    <ol class="timeline">
+      {
+        experiences.map((xp, i) => (
+          <li class="entry reveal" data-delay={String(Math.min(i, 2))}>
+            <div class="entry__when">
+              <span class="entry__node" aria-hidden="true" />
+              <p class="entry__period">
+                <time datetime={xp.start}>{xp.start}</time>
+                {xp.end && (
+                  <>
+                    {' — '}
+                    <time datetime={xp.end}>{xp.end}</time>
+                  </>
+                )}
+              </p>
+              <p class="entry__kind">{pick(xp.kind, lang)}</p>
+            </div>
+
+            <div class="entry__body">
+              <h3 class="entry__role">{pick(xp.role, lang)}</h3>
+              <p class="entry__summary">{pick(xp.summary, lang)}</p>
+
+              {xp.groups.length > 0 && (
+                <div class:list={['entry__groups', { 'entry__groups--multi': xp.groups.length > 1 }]}>
+                  {xp.groups.map((group) => (
+                    <div class="group">
+                      <h4 class="group__title">{pick(group.title, lang)}</h4>
+                      <ul class="group__list">
+                        {group.items.map((item) => (
+                          <li>{pick(item, lang)}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </div>
+</section>
+
+<style>
+  .timeline {
+    position: relative;
+  }
+  .entry {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 3fr) minmax(0, 9fr);
+    gap: 1.5rem var(--gutter);
+    padding: 2.75rem 0 3.25rem;
+    border-top: 1px solid var(--line);
+  }
+  .entry:last-child {
+    border-bottom: 1px solid var(--line);
+  }
+  .entry__when {
+    position: relative;
+    padding-left: 1.6rem;
+  }
+  /* vertical rail per entry */
+  .entry__when::before {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 0.65rem;
+    bottom: -3.25rem;
+    width: 1px;
+    background: linear-gradient(180deg, var(--line-gold), transparent 85%);
+  }
+  .entry:last-child .entry__when::before {
+    bottom: 0;
+  }
+  .entry__node {
+    position: absolute;
+    left: 0;
+    top: 0.45rem;
+    width: 7px;
+    height: 7px;
+    border: 1px solid var(--gold);
+    background: var(--black);
+    transition:
+      background-color var(--dur) var(--ease),
+      box-shadow var(--dur) var(--ease);
+  }
+  .entry:first-child .entry__node {
+    background: var(--red);
+    border-color: var(--red);
+    box-shadow: 0 0 14px rgb(198 40 50 / 0.5);
+  }
+  .entry:hover .entry__node {
+    background: var(--gold);
+  }
+  .entry__period {
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+    letter-spacing: var(--track-mid);
+    color: var(--gold);
+  }
+  .entry__kind {
+    margin-top: 0.4rem;
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--track-wide);
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+
+  .entry__role {
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: clamp(1.6rem, 1.3rem + 1.1vw, 2.25rem);
+    line-height: 1.12;
+    color: var(--ivory);
+  }
+  .entry__summary {
+    margin-top: 0.9rem;
+    max-width: 44rem;
+    color: var(--text-muted);
+  }
+  .entry__groups {
+    margin-top: 2rem;
+    display: grid;
+    gap: 1.75rem var(--gutter);
+  }
+  .entry__groups--multi {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .group__title {
+    padding-bottom: 0.75rem;
+    margin-bottom: 0.4rem;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--track-wide);
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .group__list li {
+    position: relative;
+    padding: 0.5rem 0 0.5rem 1.1rem;
+    font-size: var(--fs-small);
+    line-height: 1.55;
+    color: var(--text-muted);
+  }
+  .group__list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 1.05em;
+    width: 0.45rem;
+    height: 1px;
+    background: var(--red);
+  }
+
+  @media (max-width: 1099px) {
+    .entry__groups--multi {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 767px) {
+    .entry {
+      grid-template-columns: 1fr;
+      padding: 2rem 0 2.5rem;
+    }
+    .entry__when::before {
+      display: none;
+    }
+    .entry__groups--multi {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

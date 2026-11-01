@@ -1,0 +1,152 @@
+---
+import SectionHeader from './SectionHeader.astro';
+import { t, type Lang } from '../i18n';
+import { CONTACT_CHANNEL } from '../config/site';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const d = t(lang).contact;
+---
+
+<section id="contact" class="section contact" aria-labelledby="contact-title">
+  <div class="container">
+    <SectionHeader id="contact" index="06" label={d.label} title={d.title} />
+
+    <div class="contact__grid">
+      <p class="contact__text reveal">{d.text}</p>
+
+      <div class="contact__side">
+        <div class="channel reveal" data-delay="1">
+          <p class="channel__label">{d.channelLabel}</p>
+          {
+            CONTACT_CHANNEL ? (
+              <a class="btn btn--primary" href={CONTACT_CHANNEL.href} rel="noopener noreferrer" target="_blank">
+                {CONTACT_CHANNEL.label}
+                <span class="btn__arrow" aria-hidden="true" />
+              </a>
+            ) : (
+              <p class="channel__pending">
+                <span class="channel__pulse" aria-hidden="true" />
+                {d.channelPending}
+              </p>
+            )
+          }
+        </div>
+
+        <div class="privacy reveal" data-delay="2">
+          <p class="privacy__title">{d.privacyTitle}</p>
+          <ul class="privacy__list">
+            {d.privacy.map((item) => <li>{item}</li>)}
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact {
+    position: relative;
+    overflow: hidden;
+  }
+  .contact::after {
+    content: '';
+    position: absolute;
+    inset: auto -20% -60% 30%;
+    height: 90%;
+    background: radial-gradient(closest-side, rgb(142 21 27 / 0.13), transparent);
+    pointer-events: none;
+    z-index: -1;
+  }
+  .contact__grid {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 3rem var(--gutter);
+    align-items: start;
+  }
+  .contact__text {
+    font-family: var(--font-display);
+    font-weight: 300;
+    font-size: clamp(1.75rem, 1.2rem + 2vw, 3rem);
+    line-height: 1.22;
+    color: var(--ivory);
+    max-width: 40rem;
+  }
+
+  .contact__side {
+    display: grid;
+    gap: 1.75rem;
+  }
+  .channel {
+    padding: 1.6rem 1.6rem 1.75rem;
+    border: 1px solid var(--line);
+    background: linear-gradient(180deg, var(--black-2), var(--black));
+  }
+  .channel__label,
+  .privacy__title {
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--track-wide);
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1rem;
+  }
+  .channel__pending {
+    display: flex;
+    gap: 0.9rem;
+    font-size: var(--fs-small);
+    line-height: 1.65;
+    color: var(--text-muted);
+  }
+  .channel__pulse {
+    flex: none;
+    margin-top: 0.5em;
+    width: 6px;
+    height: 6px;
+    background: var(--gold);
+    animation: pulse 2.6s var(--ease) infinite;
+  }
+  @keyframes pulse {
+    50% {
+      opacity: 0.25;
+    }
+  }
+
+  .privacy__list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-top: 1px solid var(--line);
+  }
+  .privacy__list li {
+    position: relative;
+    padding: 0.8rem 0 0.8rem 1.1rem;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: var(--track-mid);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .privacy__list li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 0.45rem;
+    height: 1px;
+    background: var(--red);
+  }
+
+  @media (max-width: 959px) {
+    .contact__grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  @media (max-width: 479px) {
+    .privacy__list {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,338 @@
+---
+import SectionHeader from './SectionHeader.astro';
+import { pick, t, type Lang } from '../i18n';
+import { projects, projectStatuses } from '../data/projects';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const d = t(lang).projects;
+const visible = projects.filter((p) => p.published);
+const countFor = (status: string) => visible.filter((p) => p.status === status).length;
+---
+
+<section
+  id="projects"
+  class="section projects"
+  aria-labelledby="projects-title"
+  data-projects
+  data-messages={JSON.stringify(Array.from({ length: visible.length + 1 }, (_, n) => d.shown(n, visible.length)))}
+>
+  <div class="container">
+    <SectionHeader id="projects" index="05" label={d.label} title={d.title} intro={d.intro} />
+
+    <div class="filters reveal" role="group" aria-label={d.filterLabel} data-project-filters hidden>
+      <button class="filters__btn" type="button" aria-pressed="true" data-filter="all">
+        {d.filterAll}<span class="filters__count">{visible.length}</span>
+      </button>
+      {
+        projectStatuses.map((status) => (
+          <button class="filters__btn" type="button" aria-pressed="false" data-filter={status}>
+            {d.status[status]}
+            <span class="filters__count">{countFor(status)}</span>
+          </button>
+        ))
+      }
+      <p class="filters__live visually-hidden" aria-live="polite" data-project-live></p>
+    </div>
+
+    <ul class="cards">
+      {
+        visible.map((project, i) => (
+          <li class="card reveal" data-delay={String(i % 3)} data-status={project.status}>
+            <article class="card__inner" aria-labelledby={`project-${project.id}`}>
+              <header class="card__head">
+                <span class="card__index">{String(i + 1).padStart(2, '0')}</span>
+                <span class="pstatus" data-status={project.status}>
+                  {d.status[project.status]}
+                </span>
+              </header>
+
+              <h3 class="card__name" id={`project-${project.id}`}>
+                {pick(project.name, lang)}
+              </h3>
+              <p class="card__desc">{pick(project.description, lang)}</p>
+
+              <dl class="card__specs">
+                <div class="spec spec--wide">
+                  <dt>{d.fields.objective}</dt>
+                  <dd>{pick(project.objective, lang)}</dd>
+                </div>
+                <div class="spec spec--wide">
+                  <dt>{project.status === 'draft' ? d.fields.stackPlanned : d.fields.stack}</dt>
+                  <dd>
+                    <ul class="stack">
+                      {project.stack.map((tech) => (
+                        <li>{tech}</li>
+                      ))}
+                    </ul>
+                  </dd>
+                </div>
+                <div class="spec">
+                  <dt>{d.fields.difficulty}</dt>
+                  <dd class="difficulty" data-level={project.difficulty}>
+                    <span class="difficulty__bars" aria-hidden="true">
+                      <span />
+                      <span />
+                      <span />
+                    </span>
+                    {d.difficulty[project.difficulty]}
+                  </dd>
+                </div>
+                <div class="spec">
+                  <dt>{d.fields.link}</dt>
+                  <dd>
+                    {project.link ? (
+                      <a class="card__link" href={project.link} rel="noopener noreferrer" target="_blank">
+                        {d.openLink}
+                        <span aria-hidden="true">↗</span>
+                      </a>
+                    ) : (
+                      <span class="card__nolink">{d.noLink}</span>
+                    )}
+                  </dd>
+                </div>
+              </dl>
+            </article>
+          </li>
+        ))
+      }
+    </ul>
+
+    <p class="projects__empty" data-project-empty hidden>{d.empty}</p>
+  </div>
+</section>
+
+<style>
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 2.5rem;
+  }
+  .filters[hidden] {
+    display: none;
+  }
+  .filters__btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.7rem;
+    min-height: 2.5rem;
+    padding: 0 1rem;
+    border: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--track-mid);
+    text-transform: uppercase;
+    color: var(--text-muted);
+    transition:
+      border-color var(--dur-fast) var(--ease),
+      color var(--dur-fast) var(--ease),
+      background-color var(--dur-fast) var(--ease);
+  }
+  .filters__btn:hover,
+  .filters__btn:focus-visible {
+    border-color: var(--line-gold);
+    color: var(--ivory);
+  }
+  .filters__btn[aria-pressed='true'] {
+    border-color: var(--gold);
+    color: var(--gold-light);
+    background: rgb(197 164 90 / 0.06);
+  }
+  .filters__count {
+    color: var(--text-faint);
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-top: 1px solid var(--line);
+    border-left: 1px solid var(--line);
+  }
+  .cards[hidden] {
+    display: none;
+  }
+  .card {
+    display: flex;
+    border-right: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+  }
+  .card[hidden] {
+    display: none;
+  }
+  .card__inner {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    padding: 1.75rem clamp(1.25rem, 2vw, 2rem) 2rem;
+    transition: background-color var(--dur) var(--ease);
+  }
+  .card__inner::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--edge-gold);
+    opacity: 0;
+    transition: opacity var(--dur) var(--ease);
+  }
+  .card:hover .card__inner {
+    background: linear-gradient(180deg, var(--black-2), var(--black) 75%);
+  }
+  .card:hover .card__inner::before {
+    opacity: 1;
+  }
+  .card__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .card__index {
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--track-wide);
+    color: var(--gold);
+  }
+  .pstatus {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.3rem 0.6rem;
+    border: 1px dashed var(--line-strong);
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: var(--track-wide);
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .pstatus::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border: 1px solid var(--silver);
+  }
+  .pstatus[data-status='in-progress'] {
+    border-style: solid;
+  }
+  .pstatus[data-status='in-progress']::before {
+    border-color: var(--red);
+    background: var(--red);
+  }
+  .pstatus[data-status='completed'] {
+    border-style: solid;
+    border-color: var(--line-gold);
+    color: var(--gold-light);
+  }
+  .pstatus[data-status='completed']::before {
+    border-color: var(--gold);
+    background: var(--gold);
+  }
+
+  .card__name {
+    margin-top: 2rem;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--fs-h3);
+    line-height: 1.15;
+    color: var(--ivory);
+  }
+  .card__desc {
+    margin-top: 0.6rem;
+    font-size: var(--fs-small);
+    color: var(--text-muted);
+  }
+  .card__specs {
+    margin-top: auto;
+    padding-top: 1.75rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 1rem;
+  }
+  .spec {
+    padding: 0.9rem 0;
+    border-top: 1px solid var(--line);
+  }
+  .spec--wide {
+    grid-column: 1 / -1;
+  }
+  .spec dt {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: var(--track-wide);
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  .spec dd {
+    margin-top: 0.4rem;
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: var(--text-muted);
+  }
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--ivory);
+  }
+  .difficulty {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  .difficulty__bars {
+    display: inline-flex;
+    gap: 3px;
+  }
+  .difficulty__bars span {
+    width: 3px;
+    height: 10px;
+    background: var(--line-strong);
+  }
+  .difficulty__bars span:first-child,
+  [data-level='intermediate'] .difficulty__bars span:nth-child(2),
+  [data-level='advanced'] .difficulty__bars span {
+    background: var(--gold);
+  }
+  .card__link {
+    color: var(--gold-light);
+    border-bottom: 1px solid var(--line-gold);
+  }
+  .card__link:hover,
+  .card__link:focus-visible {
+    color: var(--ivory);
+    border-color: var(--ivory);
+  }
+  .card__nolink {
+    color: var(--text-faint);
+  }
+
+  .projects__empty {
+    padding: 3rem 0;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: var(--fs-small);
+    letter-spacing: var(--track-mid);
+    color: var(--text-muted);
+  }
+  .projects__empty[hidden] {
+    display: none;
+  }
+
+  @media (max-width: 1099px) {
+    .cards {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 639px) {
+    .cards {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,13 @@
+{
+  "name": "GP — Systems & Network Security",
+  "short_name": "GP",
+  "start_url": "./",
+  "scope": "./",
+  "display": "browser",
+  "background_color": "#080808",
+  "theme_color": "#080808",
+  "icons": [
+    { "src": "favicon.svg", "type": "image/svg+xml", "sizes": "any" },
+    { "src": "icon-512.png", "type": "image/png", "sizes": "512x512" }
+  ]
+}

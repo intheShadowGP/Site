@@ -1,0 +1,53 @@
+# Builds, audits and publishes the site to GitHub Pages on every push to main.
+# Repository settings → Pages → Source: "GitHub Actions".
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Least privilege: read the code, write only to Pages.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      ASTRO_TELEMETRY_DISABLED: '1'
+      # Project site: https://intheshadowgp.github.io/Site/
+      # With a custom domain, set BASE_PATH to "/" and SITE_URL to the domain.
+      SITE_URL: https://intheshadowgp.github.io
+      BASE_PATH: /Site
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      # .npmrc disables dependency install scripts
+      - run: npm ci
+      # types → build (CSP check) → dist audit → npm audit; any failure stops the deployment
+      - run: npm run verify
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

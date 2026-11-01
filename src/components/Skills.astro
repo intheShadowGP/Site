@@ -1,0 +1,249 @@
+---
+import SectionHeader from './SectionHeader.astro';
+import { pick, t, type Lang } from '../i18n';
+import { skillCategories, skillKinds } from '../data/skills';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const d = t(lang).skills;
+const usedKinds = skillKinds.filter((k) => skillCategories.some((c) => c.items.some((i) => i.kind === k)));
+---
+
+<section id="skills" class="section skills" aria-labelledby="skills-title" data-skills>
+  <div class="container">
+    <SectionHeader id="skills" index="02" label={d.label} title={d.title} intro={d.intro} />
+
+    <div class="legend reveal" role="group" aria-label={d.legendTitle} data-skill-legend hidden>
+      <span class="legend__title">{d.legendTitle}</span>
+      <button class="legend__btn" type="button" aria-pressed="true" data-kind="all">{d.legendAll}</button>
+      {
+        usedKinds.map((kind) => (
+          <button class="legend__btn" type="button" aria-pressed="false" data-kind={kind}>
+            {d.kinds[kind]}
+          </button>
+        ))
+      }
+    </div>
+
+    <div class="skills__grid">
+      {
+        skillCategories.map((cat, i) => (
+          <article class="cat reveal" data-delay={String(i)} aria-labelledby={`skill-${cat.id}`}>
+            <header class="cat__head">
+              <span class="cat__index">{String(i + 1).padStart(2, '0')}</span>
+              <span class="cat__count">{d.count(cat.items.length)}</span>
+            </header>
+            <h3 class="cat__title" id={`skill-${cat.id}`}>
+              {pick(cat.title, lang)}
+            </h3>
+            <p class="cat__scope">{pick(cat.scope, lang)}</p>
+            <ul class="cat__list">
+              {cat.items.map((item) => (
+                <li class="skill" data-kind={item.kind}>
+                  <span class="skill__name">{pick(item.name, lang)}</span>
+                  <span class="skill__kind">{d.kinds[item.kind]}</span>
+                </li>
+              ))}
+            </ul>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2.5rem;
+  }
+  .legend[hidden] {
+    display: none;
+  }
+  .legend__title {
+    margin-right: 0.75rem;
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--track-wide);
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  .legend__btn {
+    min-height: 2.25rem;
+    padding: 0 0.95rem;
+    border: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--track-mid);
+    text-transform: uppercase;
+    color: var(--text-muted);
+    transition:
+      border-color var(--dur-fast) var(--ease),
+      color var(--dur-fast) var(--ease),
+      background-color var(--dur-fast) var(--ease);
+  }
+  .legend__btn:hover,
+  .legend__btn:focus-visible {
+    border-color: var(--line-gold);
+    color: var(--ivory);
+  }
+  .legend__btn[aria-pressed='true'] {
+    border-color: var(--gold);
+    color: var(--gold-light);
+    background: rgb(197 164 90 / 0.06);
+  }
+
+  .skills__grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    border-top: 1px solid var(--line);
+  }
+  .cat {
+    padding: 2rem clamp(1rem, 2vw, 2rem) 2.25rem;
+    border-right: 1px solid var(--line);
+    transition: background-color var(--dur) var(--ease);
+  }
+  .cat:first-child {
+    padding-left: 0;
+  }
+  .cat:last-child {
+    border-right: 0;
+    padding-right: 0;
+  }
+  .cat__head {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--track-wide);
+    text-transform: uppercase;
+  }
+  .cat__index {
+    color: var(--gold);
+  }
+  .cat__count {
+    color: var(--text-faint);
+  }
+  .cat__title {
+    margin-top: 1.75rem;
+    font-family: var(--font-display);
+    font-weight: 400;
+    font-size: var(--fs-h3);
+    line-height: 1.15;
+    color: var(--ivory);
+    min-height: 2.3em;
+  }
+  .cat__scope {
+    margin-top: 0.6rem;
+    font-size: var(--fs-small);
+    color: var(--text-faint);
+  }
+  .cat__list {
+    margin-top: 1.75rem;
+    border-top: 1px solid var(--line);
+  }
+  .skill {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    padding: 0.8rem 0;
+    border-bottom: 1px solid var(--line);
+    transition:
+      opacity var(--dur) var(--ease),
+      padding var(--dur) var(--ease);
+  }
+  .skill::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    width: 4px;
+    height: 4px;
+    margin-top: -2px;
+    background: var(--red);
+    opacity: 0;
+    transition: opacity var(--dur) var(--ease);
+  }
+  .skill:hover {
+    padding-left: 0.9rem;
+  }
+  .skill:hover::before {
+    opacity: 1;
+  }
+  .skill__name {
+    font-size: var(--fs-small);
+    color: var(--ivory);
+  }
+  .skill__kind {
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: var(--track-mid);
+    text-transform: uppercase;
+    color: var(--text-faint);
+    transition: color var(--dur) var(--ease);
+  }
+
+  /* highlight state, set by the legend */
+  [data-skills][data-highlight] .skill {
+    opacity: 0.32;
+  }
+  [data-skills][data-highlight] .skill.is-match {
+    opacity: 1;
+    padding-left: 0.9rem;
+  }
+  [data-skills][data-highlight] .skill.is-match::before {
+    opacity: 1;
+  }
+  [data-skills][data-highlight] .skill.is-match .skill__kind {
+    color: var(--gold);
+  }
+
+  @media (max-width: 1099px) {
+    .skills__grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .cat,
+    .cat:first-child,
+    .cat:last-child {
+      padding: 2rem 1.5rem 2.25rem;
+      border-right: 0;
+    }
+    .cat:nth-child(odd) {
+      padding-left: 0;
+      border-right: 1px solid var(--line);
+    }
+    .cat:nth-child(even) {
+      padding-right: 0;
+    }
+    .cat:nth-child(n + 3) {
+      border-top: 1px solid var(--line);
+    }
+  }
+  @media (max-width: 639px) {
+    .skills__grid {
+      grid-template-columns: 1fr;
+    }
+    .cat,
+    .cat:first-child,
+    .cat:last-child,
+    .cat:nth-child(odd),
+    .cat:nth-child(even) {
+      padding: 1.75rem 0 2rem;
+      border-right: 0;
+    }
+    .cat + .cat {
+      border-top: 1px solid var(--line);
+    }
+    .cat__title {
+      min-height: 0;
+    }
+  }
+</style>

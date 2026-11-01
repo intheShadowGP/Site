@@ -1,0 +1,70 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Header from '../../components/Header.astro';
+import Hero from '../../components/Hero.astro';
+import About from '../../components/About.astro';
+import Skills from '../../components/Skills.astro';
+import Experience from '../../components/Experience.astro';
+import Education from '../../components/Education.astro';
+import Projects from '../../components/Projects.astro';
+import Contact from '../../components/Contact.astro';
+import Footer from '../../components/Footer.astro';
+import { LANGS, homePath, t, type Lang } from '../../i18n';
+
+export function getStaticPaths() {
+  return LANGS.map((lang) => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Lang;
+const d = t(lang);
+const alternates = Object.fromEntries(LANGS.map((l) => [l, homePath(l)]));
+---
+
+<BaseLayout lang={lang} title={d.meta.title} description={d.meta.description} path={homePath(lang)} alternates={alternates}>
+  <a class="skip-link" href="#main">{d.a11y.skip}</a>
+  <Header lang={lang} />
+  <main id="main" tabindex="-1">
+    <Hero lang={lang} />
+    <About lang={lang} />
+    <Skills lang={lang} />
+    <Experience lang={lang} />
+    <Education lang={lang} />
+    <Projects lang={lang} />
+    <Contact lang={lang} />
+  </main>
+  <Footer lang={lang} />
+  <p class="toast" role="status" aria-live="polite" data-toast data-storage-error={d.errors.storage}></p>
+</BaseLayout>
+
+<style>
+  .toast {
+    position: fixed;
+    left: 50%;
+    bottom: 1.5rem;
+    z-index: 150;
+    max-width: min(32rem, calc(100% - 2rem));
+    padding: 0.9rem 1.1rem;
+    border: 1px solid rgb(198 40 50 / 0.6);
+    background: var(--black-2);
+    font-size: var(--fs-small);
+    color: var(--ivory);
+    transform: translate(-50%, 150%);
+    opacity: 0;
+    transition:
+      transform var(--dur) var(--ease),
+      opacity var(--dur) var(--ease);
+    pointer-events: none;
+  }
+  .toast:empty {
+    padding: 0;
+    border: 0;
+  }
+  .toast[data-visible] {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+</style>
+
+<script>
+  import '../../scripts/site';
+</script>

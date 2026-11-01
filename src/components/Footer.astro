@@ -1,0 +1,124 @@
+---
+import Logo from './Logo.astro';
+import { LANG_META, LANGS, homePath, t, type Lang } from '../i18n';
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+const d = t(lang);
+const buildYear = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__top">
+      <div class="footer__brand">
+        <Logo id="logo-footer" class="footer__logo" />
+        <p class="footer__mention">{d.footer.mention}</p>
+      </div>
+      <p class="footer__signature">{d.footer.signature}</p>
+    </div>
+
+    <div class="footer__bottom">
+      <p class="footer__copy">
+        © <span data-year>{buildYear}</span> GP. {d.footer.rights}
+      </p>
+      <nav class="footer__lang" aria-label={d.a11y.languageNav}>
+        <span class="footer__lang-label">{d.footer.language}</span>
+        {
+          LANGS.map((l) => (
+            <a
+              href={homePath(l)}
+              hreflang={l}
+              lang={l}
+              data-lang-switch={l}
+              aria-current={l === lang ? 'page' : undefined}
+            >
+              {LANG_META[l].label}
+            </a>
+          ))
+        }
+      </nav>
+      <a class="footer__top-link" href="#home">
+        {d.footer.top}<span aria-hidden="true">↑</span>
+      </a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding: clamp(3.5rem, 6vw, 5rem) 0 2rem;
+    border-top: 1px solid var(--line);
+    background: linear-gradient(180deg, var(--black), #050505);
+  }
+  .footer__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 2rem;
+    flex-wrap: wrap;
+    padding-bottom: 2.5rem;
+  }
+  .footer__brand {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+  }
+  .footer__brand :global(.footer__logo) {
+    width: 3.25rem;
+    height: 3.25rem;
+  }
+  .footer__mention {
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--track-wide);
+    text-transform: uppercase;
+    color: var(--ivory);
+  }
+  .footer__signature {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: clamp(1.1rem, 1rem + 0.5vw, 1.4rem);
+    color: var(--text-muted);
+  }
+  .footer__bottom {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--line);
+    font-family: var(--font-mono);
+    font-size: var(--fs-micro);
+    letter-spacing: var(--track-mid);
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  .footer__lang {
+    display: flex;
+    gap: 1.25rem;
+    align-items: center;
+  }
+  .footer__lang a,
+  .footer__top-link {
+    padding: 0.5rem 0;
+    color: var(--text-muted);
+    transition: color var(--dur-fast) var(--ease);
+  }
+  .footer__lang a[aria-current] {
+    color: var(--gold);
+  }
+  .footer__lang a:hover,
+  .footer__lang a:focus-visible,
+  .footer__top-link:hover,
+  .footer__top-link:focus-visible {
+    color: var(--ivory);
+  }
+  .footer__top-link {
+    display: inline-flex;
+    gap: 0.6rem;
+  }
+</style>

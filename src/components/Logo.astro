@@ -1,0 +1,73 @@
+---
+/**
+ * GP monogram. The G closes into the stem of the P — a single continuous
+ * gesture — inside a chamfered frame with registration ticks. The small red
+ * square is a nod to the Japanese seal (hanko).
+ */
+interface Props {
+  /** Unique per instance: gradient ids must not collide on the page. */
+  id: string;
+  class?: string;
+  /** Accessible name. Omit when the logo is decorative. */
+  label?: string;
+  frame?: boolean;
+}
+
+const { id, class: className, label, frame = true } = Astro.props;
+const gold = `${id}-gold`;
+const silver = `${id}-silver`;
+const seal = `${id}-seal`;
+---
+
+<svg
+  class:list={['gp-logo', className]}
+  viewBox="0 0 120 120"
+  xmlns="http://www.w3.org/2000/svg"
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+  focusable="false"
+>
+  <defs>
+    <linearGradient id={gold} x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#E2C98C"></stop>
+      <stop offset="0.5" stop-color="#C5A45A"></stop>
+      <stop offset="1" stop-color="#8F7438"></stop>
+    </linearGradient>
+    <linearGradient id={silver} x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F2F0EC"></stop>
+      <stop offset="0.55" stop-color="#AEB2B7"></stop>
+      <stop offset="1" stop-color="#6E7277"></stop>
+    </linearGradient>
+    <linearGradient id={seal} x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#C62832"></stop>
+      <stop offset="1" stop-color="#8E151B"></stop>
+    </linearGradient>
+  </defs>
+  {
+    frame && (
+      <g class="gp-logo__frame" fill="none" stroke={`url(#${gold})`} stroke-width="0.9">
+        <path d="M14 4 H106 L116 14 V106 L106 116 H14 L4 106 V14 Z" pathLength="1" />
+        <path d="M60 4 V9 M60 111 V116 M4 60 H9 M111 60 H116" stroke-width="0.7" />
+      </g>
+    )
+  }
+  <path
+    class="gp-logo__g"
+    d="M66.4 44.6 A24 24 0 1 0 72 60 H58"
+    fill="none"
+    stroke={`url(#${silver})`}
+    stroke-width="3.4"
+    stroke-linecap="square"
+    pathLength="1"></path>
+  <path
+    class="gp-logo__p"
+    d="M72 84 V36 H82 A12 12 0 0 1 82 60 H72"
+    fill="none"
+    stroke={`url(#${gold})`}
+    stroke-width="3.4"
+    stroke-linecap="square"
+    stroke-linejoin="miter"
+    pathLength="1"></path>
+  {frame && <rect class="gp-logo__seal" x="96" y="96" width="7" height="7" fill={`url(#${seal})`} />}
+</svg>

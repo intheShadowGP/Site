@@ -1,0 +1,80 @@
+---
+import '../styles/global.css';
+import manrope from '../assets/fonts/manrope-latin-wght-normal.woff2?url';
+import cormorant from '../assets/fonts/cormorant-garamond-latin-300-normal.woff2?url';
+import { buildCsp } from '../../config/security.mjs';
+import { LANG_META, LANGS, type Lang } from '../i18n';
+import { BASE, withBase } from '../config/paths';
+
+interface Props {
+  lang: Lang | 'mul';
+  title: string;
+  description: string;
+  /** Path of this page (e.g. "/fr/"). Used for canonical + alternates. */
+  path: string;
+  /** Localized counterparts, for hreflang. */
+  alternates?: Partial<Record<Lang, string>>;
+  /** Root gate page: lets the boot script restore a saved language. */
+  gate?: boolean;
+  noindex?: boolean;
+  bodyClass?: string;
+}
+
+const { lang, title, description, path, alternates = {}, gate = false, noindex = false, bodyClass } = Astro.props;
+const site = Astro.site;
+const abs = (p: string) => (site ? new URL(p, site).href : undefined);
+const htmlLang = lang === 'mul' ? 'en' : lang;
+const ogLocale = lang === 'mul' ? LANG_META.en.ogLocale : LANG_META[lang].ogLocale;
+const csp = import.meta.env.PROD ? buildCsp({ meta: true }) : undefined;
+---
+
+<!doctype html>
+<html lang={htmlLang} data-gate={gate ? '' : undefined} data-base={BASE}>
+  <head>
+    <meta charset="utf-8" />
+    {csp && <meta http-equiv="Content-Security-Policy" content={csp} />}
+    <meta name="referrer" content="no-referrer" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <script is:inline src={withBase('/scripts/boot.js')}></script>
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="robots" content={noindex ? 'noindex, nofollow' : 'index, follow'} />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#080808" />
+    <meta name="format-detection" content="telephone=no, email=no, address=no" />
+
+    <link rel="preload" href={manrope} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={cormorant} as="font" type="font/woff2" crossorigin />
+
+    <link rel="icon" href={withBase('/favicon.svg')} type="image/svg+xml" />
+    <link rel="icon" href={withBase('/favicon-32.png')} sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href={withBase('/apple-touch-icon.png')} />
+    <link rel="manifest" href={withBase('/site.webmanifest')} />
+
+    {site && !noindex && <link rel="canonical" href={abs(path)} />}
+    {
+      site &&
+        LANGS.filter((l) => alternates[l]).map((l) => (
+          <link rel="alternate" hreflang={l} href={abs(alternates[l] as string)} />
+        ))
+    }
+    {
+      site && Object.keys(alternates).length > 0 && (
+        <link rel="alternate" hreflang="x-default" href={abs(withBase('/'))} />
+      )
+    }
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="GP" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content={ogLocale} />
+    {site && <meta property="og:url" content={abs(path)} />}
+    {site && <meta property="og:image" content={abs(withBase('/og-image.png'))} />}
+    {site && <meta property="og:image:alt" content="GP — Systems & Network Security" />}
+    <meta name="twitter:card" content={site ? 'summary_large_image' : 'summary'} />
+  </head>
+  <body class={bodyClass}>
+    <slot />
+  </body>
+</html>

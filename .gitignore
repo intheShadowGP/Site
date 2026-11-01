@@ -1,0 +1,29 @@
+# build output
+dist/
+.astro/
+
+# dependencies
+node_modules/
+
+# environment & secrets — never commit
+.env
+.env.*
+!.env.example
+
+# logs & OS noise
+npm-debug.log*
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# local tooling
+.claude/
+
+# editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# private working material (CV originals, notes) — keep out of the repo
+private/
